@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        input {
+            display: block;
+        }
+
+        img {
+            width: 100px;
+            height: 100px;
+            display: block;
+        }
+
+
+        table tr th,
+        td {
+            border: 2px dashed lawngreen;
+        }
+
+        #find {
+            margin-top: -10px;
+            position: absolute;
+            left: 45%;
+        }
+
+        #add {
+            margin-top: -10px;
+            position: absolute;
+            left: 0;
+        }
+
+        #addbox {
+            padding: 10px;
+            background-color: gold;
+            position: absolute;
+            left: 30%;
+            top: 50px;
+            display: none;
+            z-index: 30;
+        }
+
+        #changebox {
+            padding: 10px;
+            background-color: gold;
+            position: absolute;
+            left: 10%;
+            display: none;
+            z-index: 50;
+        }
+
+        #findbox {
+            padding: 10px;
+            background-color: gold;
+            position: absolute;
+            left: 30%;
+            top: 50px;
+            display: none;
+            z-index: 30;
+        }
+
+        #findresult {
+            width: 100%;
+            height: 100%;
+            padding: 10px;
+            background-color: gold;
+            position: absolute;
+
+            display: none;
+            z-index: 40;
+        }
+
+        #changefimagebox {
+            padding: 10px;
+            background-color: gold;
+            position: absolute;
+            left: 30%;
+            top: 50px;
+            display: none;
+            z-index: 60;
+        }
+
+        #behchange {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="findbox"></div>
+    <div id="findresult"></div>
+    <div id="changebox"></div>
+    <div id="changefimagebox">
+        <button id="back">返回</button><br>
+        选择更换的图片文件：<input type="file" name="fpath" id="file">
+        <div id="befchange">
+            更换前的示图：
+            <img id="img1">
+        </div>
+        <div id="behchange">
+            更换后的示图：
+            <img id="img2">
+        </div>
+        <button id="abandon" style="display: inline-block;margin-top: 10px;">取消</button>
+        <button id="sure" style="display: inline-block;margin-top: 10px;">确定</button>
+
+    </div>
+    <div id="addbox">
+        <button id="back1">返回</button><br>
+        餐号：<input type="text" name="fid" id="fid">
+        菜名：<input type="text" name="fname" id="fname">
+        图径：<input type="file" name="fpath" id="fpath">
+        介绍：<input type="text" name="fremark" id=fremark>
+        价格(￥)：<input type="text" name="fprice" id="fprice">
+        今日额量(份)：<input type="text" name="fremain" id="fremain" value="100">
+        <button id="abandon1" style="display: inline-block;margin-top: 10px;">取消</button>
+        <button id="sure1" style="display: inline-block;margin-top: 10px;">确定</button>
+    </div>
+
+    <h2 style="text-align: center;">菜单总览</h2>
+    <button id="add">增加菜品</button>
+    <button id="find">查找菜品</button> <br>
+    <table id="food" style="margin:0 auto;border:2px solid black; border-collapse: collapse;">
+
+        <tr id="head">
+            <th>餐号</th>
+            <th>菜名</th>
+            <th>介绍</th>
+            <th>单价</th>
+            <th>图示</th>
+            <th>今日额量</th>
+            <th>售卖量</th>
+            <th style="width: 100px;">菜单操作</th>
+        </tr>
+    </table>
+</body>
+
+<script type="text/javascript" src="../js/jquery-1.10.1.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/axios/0.11.0/axios.min.js"></script>
+<script>
+
+
+    window.onload = function () {
+
+        axios.get('http://127.0.0.1:8000/getall').then(response => {
+
+            var result3 = response.data;
+            var ths = document.getElementsByTagName("th");
+
+            for (var i = 0; i < result3.length; i++) {
+                var row = document.createElement("tr");
+                row.setAttribute("class", "row");
+                document.getElementById("food").appendChild(row);
+                for (var j = 0; j < ths.length; j++) {
+                    var col = document.createElement("td");
+                    row.appendChild(col);
+                    switch (j) {
+                        case 0:
+                            col.innerText = result3[i].fid;
+                            break;
+
+                        case 1:
+                            col.innerText = result3[i].fname;
+                            break;
+                        case 2:
+                            col.innerText = result3[i].remarks;
+                            break;
+                        case 3:
+                            col.innerText = result3[i].price;
+                            break;
+                        case 4:
+                            var show = document.createElement("img");
+                            col.appendChild(show);
+                            show.src = result3[i].img;
+                            show.style.cssText = "display:block;width:100px;height:100px;margin:0 auto;"
+                            break;
+                        case 5:
+                            col.innerText = result3[i].remain;
+                            break;
+                        case 6:
+                            col.innerText = result3[i].sold;
+                            break;
+                    }
+                }
+                var col7 = row.cells[ths.length - 1];
+                var fooddel = document.createElement("button");
+                fooddel.setAttribute("class", "del");
+                fooddel.innerHTML = "删除菜品";
+                var foodchange = document.createElement("button");
+                foodchange.setAttribute("class", "change");
+                foodchange.innerHTML = "修改菜品";
+                var foodsoldall = document.createElement("button");
+                foodsoldall.setAttribute("class", "soldall");
+                foodsoldall.innerHTML = "已售空";
+                var changefimage = document.createElement("button");
+                changefimage.setAttribute("class", "changefimg");
+                changefimage.innerHTML = "更换示图";
+                col7.appendChild(fooddel);
+                col7.appendChild(foodchange);
+                col7.appendChild(changefimage);
+                col7.appendChild(foodsoldall);
+            }
+            $(".del").click(function () {
+                var id = $(this).parent().siblings().eq(0).text();
+                var name = $(this).parent().siblings().eq(1).text();
+                axios.post('http://127.0.0.1:8000/delfood', null, {
+                    params: {
+                        fid: id,
+                        fname: name,
+                        oldfimg: result3[id - 1].img
+                    }
+                }).then(ok => {
+                    axios.post('http://127.0.0.1:8000/updatedelfid?fid=' + id, null)
+                })
+            })
+            $(".change").click(function () {
+                var data = [];
+                for (var i = 0; i < ths.length - 1; i++) {
+                    var text = $(this).parent().siblings().eq(i).text();
+                    data.push(text);
+                }
+                // console.log(data[4])
+
+                var changebox = document.getElementById("changebox");
+                changebox.style.display = "block";
+                var backbtn = document.createElement("button");
+                changebox.appendChild(backbtn);
+                backbtn.innerHTML = "返回";
+                backbtn.onclick = function () {
+                    changebox.style.display = "none";
+                    window.location.reload();
+                }
+                var divpar = document.createElement("div");
+                changebox.appendChild(divpar);
+                for (var i = 0; i < ths.length - 1; i++) {
+                    divpar.innerHTML += ths[i].innerText + ":";
+                    var input = document.createElement("input");
+                    divpar.appendChild(input);
+                    input.defaultValue = data[i];
+                }
+                $("input")[4].setAttribute("type", "image");
+                $("input")[4].style.cssText = "width:150px;height:100px;"
+                $("input")[4].src = result3[data[0] - 1].img;
+                var abandon = document.createElement("button");
+                changebox.appendChild(abandon);
+                abandon.style.cssText = "margin-left:20%;"
+                abandon.innerText = "取消";
+                var sure = document.createElement("button");
+                changebox.appendChild(sure);
+                sure.innerText = "确定";
+                abandon.onclick = function () {
+                    changebox.style.display = "none";
+                    window.location.reload();
+                }
+                sure.onclick = function () {//?
+                    var inputs = document.querySelectorAll("input");
+                    //console.log(inputs)
+                    if (inputs[0].value == 0) {
+                        inputs[0].value = data[0];
+
+                    }
+                    console.log(inputs[0].value)
+                    axios.post('http://127.0.0.1:8000/changefood', null, {
+                        params: {
+                            fid: data[0],
+                            fname: data[1],
+
+                            changeid: inputs[0].value,
+                            changename: inputs[1].value,
+                            changeremarks: inputs[2].value,
+                            changeprice: inputs[3].value,
+                            changeremain: inputs[5].value,
+                            changesold: inputs[6].value
+                        }
+                    }).then(show => {
+                        console.log("ok")
+                        alert("修改完毕！")
+                    })
+                }
+
+            })//changebox
+
+            $("#soldall").click(function () {
+                var id = $(this).parent().siblings().eq(0).text();
+                var name = $(this).parent().siblings().eq(1).text();
+                var sold = $(this).parent().siblings().eq(6).text();
+                axios.post('http://127.0.0.1:8000/updatedata', null, {//点餐完后更新上传已售出和剩余额量数据
+                    params: {
+                        remain:"0",
+                        sold: sold,
+                        fid: id,
+                        fname: name
+                    }
+                })
+            })
+            $(".changefimg").click(function () {
+
+                var changefimagebox = document.getElementById("changefimagebox");
+                changefimagebox.style.display = "block";
+                var fid = $(this).parent().siblings().eq(0).text();
+                var fname = $(this).parent().siblings().eq(1).text();
+                $("#img1")[0].src = result3[fid - 1].img;
+                $("#back").click(function () {
+                    changefimagebox.style.display = "none";
+                    window.location.reload();
+                })
+                $("#abandon").click(function () {
+                    changefimagebox.style.display = "none";
+                    window.location.reload();
+                })
+                $("#sure").click(function () {
+                    var formdata = new FormData();
+                    formdata.append("file", $("#file")[0].files[0]);
+                    formdata.append("fid", fid);
+                    formdata.append("fname", fname);
+                    formdata.append("oldfimg", result3[fid - 1].img);
+                    axios.post('http://127.0.0.1:8000/changefimage', formdata).then(ok => {
+                        alert("ok")
+                        //console.log(ok.data)
+                        $("#befchange")[0].style.display = "none";
+                        $("#behchange")[0].style.display = "block";
+                        $("#img2")[0].src = ok.data;
+                    })
+
+
+                })//sure
+            })
+            var add = document.getElementById("add");
+            add.onclick = function () {
+                var addbox = document.getElementById("addbox");
+                addbox.style.display = "block";
+                $("#back1").click(function () {
+                    addbox.style.display = "none";
+                    window.location.reload();
+                })
+                $("#abandon1").click(function () {
+                    addbox.style.display = "none";
+                    window.location.reload();
+                })
+                $("#sure1").click(function () {
+                    var formdata = new FormData();
+                    formdata.append("fid", $("#fid")[0].value);
+                    formdata.append("fname", $("#fname")[0].value)
+                    formdata.append("fremark", $("#fremark")[0].value);
+                    formdata.append("fprice", $("#fprice")[0].value);
+                    formdata.append("fremain", $("#fremain")[0].value);
+                    formdata.append("file", $("#fpath")[0].files[0]);
+                    console.log($("#fid")[0].value);
+                    if ($("#fid")[0].value == 0) {
+                        $("#fid")[0].value = parseInt(result3[result3.length - 1].fid) + 1;
+                    }
+                    axios.post('http://127.0.0.1:8000/updateaddfid?fid=' + $("#fid")[0].value).then(ok => {
+
+                    }).then(ok => {
+                        axios.post('http://127.0.0.1:8000/addfood', formdata, {
+                            params: {
+                                fid: $("#fid")[0].value,
+                                fname: $("#fname")[0].value,
+                                fremark: $("#fremark")[0].value,
+                                fprice: $("#fprice")[0].value,
+                                fremain: $("#fremain")[0].value,
+                            }
+                        })
+                    })
+
+                })//sure1
+            }
+        })
+    }//window
+
+
+    $("#find").click(function () {
+        var findbox = document.getElementById("findbox");
+        findbox.style.display = "block";
+        var backbtn1 = document.createElement("button");
+        findbox.appendChild(backbtn1);
+        backbtn1.innerHTML = "返回";
+        backbtn1.onclick = function () {
+            findbox.style.display = "none";
+            window.location.reload();
+        }
+        var divpar1 = document.createElement("div");
+        findbox.appendChild(divpar1);
+        divpar1.innerHTML += "餐号：";
+        var inputfid = document.createElement("input");
+        divpar1.appendChild(inputfid);
+        var br1 = document.createElement("br");
+        divpar1.appendChild(br1);
+        divpar1.innerHTML += "菜名：";
+        var inputfname = document.createElement("input");
+        divpar1.appendChild(inputfname);
+        var br2 = document.createElement("br");
+        divpar1.appendChild(br2);
+        var beginfind = document.createElement("button");
+        findbox.appendChild(beginfind);
+        beginfind.style.cssText = "margin-left:40%;margin-top:10px;"
+        beginfind.innerHTML = "开始查找";
+        beginfind.onclick = function () {
+            var inputfidandname = document.querySelectorAll("input");
+            //console.log(inputfidandname[1].value)
+            if (inputfidandname[0].value == "" || inputfidandname[1].value == "") {
+                alert("餐号和菜名不能为空！》(**)《")
+            } else {
+                axios.get('http://127.0.0.1:8000/findfoodbyidname?fid=' + inputfidandname[0].value + '&fname=' + inputfidandname[1].value).then(value => {
+                    var findresult = document.getElementById("findresult");
+                    findresult.style.display = "block";
+                    var result3 = value.data;
+                    var backbtn1 = document.createElement("button");
+                    findresult.appendChild(backbtn1);
+                    backbtn1.innerHTML = "返回";
+                    var table1 = document.createElement("table");
+                    table1.style.cssText = "margin:0 auto;border:2px solid black; border-collapse: collapse;width:600px;"
+                    findresult.appendChild(table1);
+                    table1.innerHTML = "<tr><th>餐号</th><th>菜名</th><th>介绍</th><th>价格</th><th>图示</th><th>今日余量</th><th>已售出</th></tr>";
+                    backbtn1.onclick = function () {
+                        findresult.innerHTML = "";
+                        findresult.style.display = "none";
+                    }
+                    var style = document.createElement('style');
+                    style.type = 'text/css';
+                    style.innerHTML = "table tr th,td{border:1px solid teal; }";
+                    document.documentElement.appendChild(style);
+                    for (var i = 0; i < result3.length; i++) {
+                        var row = document.createElement("tr");
+                        table1.appendChild(row);
+                        for (var j = 0; j < 7; j++) {
+                            var col = document.createElement("td");
+                            row.appendChild(col);
+                            switch (j) {
+                                case 0:
+                                    col.innerText = result3[i].fid;
+                                    break;
+
+                                case 1:
+                                    col.innerText = result3[i].fname;
+                                    break;
+                                case 2:
+                                    col.innerText = result3[i].remarks;
+                                    break;
+                                case 3:
+                                    col.innerText = result3[i].price;
+                                    break;
+                                case 4:
+
+                                    var show1 = document.createElement("img");
+                                    col.appendChild(show1);
+                                    show1.src = result3[i].img;
+                                    show1.style.cssText = "display:block;width:100px;height:100px;margin:0 auto;"
+                                    break;
+                                case 5:
+                                    col.innerText = result3[i].remain;
+                                    break;
+                                case 6:
+                                    col.innerText = result3[i].sold;
+                                    break;
+
+
+                            }
+
+                        }
+                    }
+                })
+            }
+        }
+    })
+    setInterval(function () {
+        axios.get('http://127.0.0.1:8000/getall').then(response => {
+            var result3 = response.data;
+            var trs = document.getElementsByClassName("row");
+            //console.log(trs.length)
+            if (trs.length != result3.length) {
+                var url = window.location.href;
+                window.location.href = url;//刷新页面
+
+            }
+        });
+
+        // window.location.reload();//刷新页面
+    }, 1000)
+</script>
+
+</html>

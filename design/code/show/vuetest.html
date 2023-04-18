@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div id="app">{{a1}}
+        <hr size="20px">
+        <select id="myform">
+            <option>西红柿炒鸡蛋</option>
+            <option>宫保鸡丁</option>
+            <option>红烧肉</option>
+            <option>辣椒炒肉</option>
+        </select>
+        <button v-on:click="find">find</button>
+        <button style="margin-left: 100px;" @click="incomeall1">总收入</button><input name="income1" v-model="allincome"/>
+        <h1>{{incomeall}}</h1><h2>{{incomeall}}</h2>
+    </div>
+</body>
+<script src="https://cdn.staticfile.org/vue/3.0.5/vue.global.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/axios/0.11.0/axios.min.js"></script>
+<script>
+    var app = {
+        data() {
+            return {
+                a1: 1,
+                allincome: 0,
+
+            }
+
+        },
+        methods: {
+            find() {
+                var sel=document.getElementById("myform");
+                var index=sel.selectedIndex;
+                //console.log(index)
+                var foodname=sel.options[index].text;
+                //console.log(foodname)
+                axios.get('http://127.0.0.1:8000/findfoodbyname?fname='+foodname
+                ).then(function (response) {
+                    //console.log(response.data);
+                    var result3=response.data;
+                    var messshow=document.createElement("div");
+                    var body=document.body;
+                    body.appendChild(messshow)
+                    var table=document.createElement("table");
+                    messshow.appendChild(table);
+                    var tip=document.createElement("th");
+                    table.appendChild(tip);
+                    tip.innerText="{{根据菜名搜寻菜品信息}}";
+                    var row=document.createElement("tr");
+                    table.appendChild(row)
+                    for (var j = 0; j < 7; j++) {
+                    var col = document.createElement("td");
+                    row.appendChild(col);
+                    col.style.cssText="border: 2px dashed lawngreen;color:red"
+                    switch (j) {
+                        case 0:
+                            col.innerText ="菜号："+ result3[0].fid;
+                            break;
+
+                        case 1:
+                            col.innerText = result3[0].fname;
+                            break;
+                        case 2:
+                            col.innerText = result3[0].remarks;
+                            break;
+                        case 3:
+                            col.innerText = result3[0].price+"￥/份";
+                            break;
+                        case 4:
+                            var show = document.createElement("img");
+                            col.appendChild(show);
+                            show.src = result3[0].img;
+                            show.style.cssText = "display:block;width:100px;height:100px;margin:0 auto;"
+                            break;
+                        case 5:
+                            col.innerText ="余量："+ result3[0].remain+"份";
+                            break;
+                        case 6:
+                            col.innerText ="本菜品受欢迎程度：" +result3[0].sold+"份";
+                            break;
+                    }
+                    sel.onchange=function(){
+                        messshow.style.display="none"
+                    }
+                }
+
+                   
+                
+                }).catch(function (error) {
+                        console.log(error);
+                    });
+                    
+            },
+            incomeall1(){
+                axios.get('http://127.0.0.1:8000/getorder').then(res=>{
+                //console.log(res);
+                var data=res.data;
+                var myincome=0;
+                for(var i=0;i<data.length;i++){
+                    myincome+=data[i].needamount*data[i].price;
+                }
+               this.allincome=myincome;
+                return this.allincome;
+            })
+            }
+        }  ,
+        computed:{
+            incomeall:function(){
+              
+               return this.allincome;
+            }
+        }      
+    }
+    Vue.createApp(app).mount('#app');
+
+    function incomeall2(){
+        axios.get('http://127.0.0.1:8000/getorder').then(res=>{
+                //console.log(res);
+                var data=res.data;
+                var myincome=0;
+                for(var i=0;i<data.length;i++){
+                    myincome+=data[i].needamount*data[i].price;
+                }
+               
+                var inputincome1=document.getElementsByName("income1");
+                inputincome1[0].value=myincome
+                // return this.allincome;
+            })
+    }
+    setInterval(incomeall2,1000);
+</script>
+
+</html>

@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+ 
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+    
+  table tr th,td{
+      border:1px solid teal;
+    
+     
+  }
+  #find{
+      position: absolute;
+      left: 45%;
+  }
+  #changebox{
+      padding: 10px;
+      background-color: gold;
+      position: absolute;
+      left: 40%;
+      display: none;
+      z-index: 50;
+  }
+  #findbox{
+      padding: 10px;
+      background-color: gold;
+      position: absolute;
+      left: 30%;
+      top: 50px;
+      display: none;
+      z-index: 30;
+  }
+  #findresult{
+      width: 100%;
+      height: 100%;
+      padding: 10px;
+      background-color: gold;
+      position: absolute;
+      
+      display: none;
+      z-index: 40;
+  }
+ 
+</style>
+<body>
+    <div id="findbox"></div>
+    <div id="findresult"></div>
+    <div id="changebox"></div> 
+    <button id="back">返回</button>
+    <button id="find">查找个人订单</button>
+    <h2 style="text-align: center;">点餐订单总览</h2>
+    
+    <table id="ordered" style="margin:0 auto;border:1px solid black; border-collapse: collapse;">
+      
+        <tr id="head">
+            
+            <th>桌号</th>
+            <th>用餐人</th>
+            <th>餐号</th>
+            <th>菜名</th>
+            <th>单价</th>
+            <th>数量</th>
+            <th>时间</th>
+            <th>完成状况</th>
+            <th>完成操作</th>
+            <th>订单操作</th>
+        </tr>
+    </table>
+    
+</body>
+<script type="text/javascript" src="../js/jquery-1.10.1.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/axios/0.11.0/axios.min.js"></script>
+<script type="text/javascript">
+
+     window.onload = function(){
+
+        axios.get('http://127.0.0.1:8000/getorder').then(response=>{
+
+            var result3=response.data;
+        var ths=document.getElementsByTagName("th");
+            
+            for(var i=0;i<result3.length;i++){
+                var row=document.createElement("tr");
+                row.setAttribute("class","row")
+                document.getElementById("ordered").appendChild(row);
+                for(var j=0;j<ths.length;j++){
+                    var col=document.createElement("td");
+                    row.appendChild(col);
+               switch(j){
+                   case 0:
+                       col.innerText=result3[i].desknum;
+                       break;
+
+                    case 1:
+                        col.innerText=result3[i].username;
+                        break;
+                    case 2:
+                        col.innerText=result3[i].id;
+                        break;
+                    case 3:
+                        col.innerText=result3[i].name;
+                        break;
+                    case 4:
+                        col.innerText=result3[i].price;
+                        break; 
+                    case 5:
+                        col.innerText=result3[i].needamount;
+                        break;
+                    case 6:
+                        col.innerText=result3[i].time;
+                        break;   
+
+                    case 7:
+                       col.innerText+=result3[i].success;
+                        break;
+                    
+               }
+                 
+                }
+               var trs=document.getElementsByTagName("tr");
+               var col8=trs[i+1].cells[ths.length-2];
+               
+                        var opt1=document.createElement("button");
+                        opt1.setAttribute("class","undo");
+                        opt1.innerHTML="未做";
+                        var opt2=document.createElement("button");
+                        opt2.setAttribute("class","doing");
+                        opt2.innerHTML="正做";
+                        var opt3=document.createElement("button");
+                        opt3.setAttribute("class","done");
+                        opt3.innerHTML="已做";
+                        col8.appendChild(opt1);
+                        col8.appendChild(opt2);
+                        col8.appendChild(opt3); 
+
+                var col9=row.cells[ths.length-1];
+                var ordel=document.createElement("button");
+                ordel.setAttribute("class","del");
+                        ordel.innerHTML="删除订单";
+                var orchange=document.createElement("button");
+                orchange.setAttribute("class","change");
+                        orchange.innerHTML="修改订单";
+                        col9.appendChild(ordel);
+                        col9.appendChild(orchange);
+                        
+            }  
+    $(".undo").click(function(){
+        var desknum= $(this).parent().siblings().eq(0).text();
+     var username= $(this).parent().siblings().eq(1).text();
+     var id= $(this).parent().siblings().eq(2).text();
+     var name= $(this).parent().siblings().eq(3).text();
+     var time= $(this).parent().siblings().eq(6).text();
+      var cont=$(this).text();
+      $(this).parent().prev().text(cont); 
+      axios.post('http://127.0.0.1:8000/updatesuccess',null,{
+          params:{
+              success:cont,
+              desknum:desknum,
+              username:username,
+              id:id,
+              name:name,
+              time:time
+              
+          }
+      })
+    
+     // console.log(desknum);
+     })
+      $(".doing").click(function(){
+        var desknum= $(this).parent().siblings().eq(0).text();
+     var username= $(this).parent().siblings().eq(1).text();
+     var id= $(this).parent().siblings().eq(2).text();
+     var name= $(this).parent().siblings().eq(3).text();
+     var time= $(this).parent().siblings().eq(6).text();
+      var cont=$(this).text();
+      $(this).parent().prev().text(cont); 
+      axios.post('http://127.0.0.1:8000/updatesuccess',null,{
+          params:{
+              success:cont,
+              desknum:desknum,
+              username:username,
+              id:id,
+              name:name,
+              time:time
+              
+          }
+      })
+     
+     })
+     $(".done").click(function(){
+        var desknum= $(this).parent().siblings().eq(0).text();
+     var username= $(this).parent().siblings().eq(1).text();
+     var id= $(this).parent().siblings().eq(2).text();
+     var name= $(this).parent().siblings().eq(3).text();
+     var time= $(this).parent().siblings().eq(6).text();
+      var cont=$(this).text();
+      $(this).parent().prev().text(cont); 
+      axios.post('http://127.0.0.1:8000/updatesuccess',null,{
+          params:{
+              success:cont,
+              desknum:desknum,
+              username:username,
+              id:id,
+              name:name,
+              time:time
+              
+          }
+      })
+     
+     })
+     $(".del").click(function(){
+        var desknum= $(this).parent().siblings().eq(0).text();
+     var username= $(this).parent().siblings().eq(1).text();
+     var id= $(this).parent().siblings().eq(2).text();
+     var name= $(this).parent().siblings().eq(3).text();
+     var time= $(this).parent().siblings().eq(6).text();
+     
+     var needamounts=parseInt($(this).parent().siblings().eq(5).text()) ;
+       var fidnum=parseInt(id.slice(1,-4)) ;
+      axios.get('http://127.0.0.1:8000/getall').then(response=>{
+          var result=response.data;
+          var fremain=parseInt(result[fidnum-1].remain);
+          var fsold=parseInt(result[fidnum-1].sold);
+          axios.post('http://127.0.0.1:8000/updatedata',null,{//每删除一个订单，相应地增减remain,sold
+              params:{
+                  fid:fidnum,
+                  fname:name,
+                  remain:fremain+needamounts,
+                  sold:fsold-needamounts
+              }
+          })
+
+      })
+      axios.post('http://127.0.0.1:8000/delorder',null,{
+          params:{
+              desknum:desknum,
+              username:username,
+              id:id,
+              name:name,
+              time:time
+              
+          }
+      })
+     
+     })
+     $(".change").click(function(){
+         var data=[];
+         for(var i=0;i<ths.length-2;i++){
+             var text=$(this).parent().siblings().eq(i).text()
+             data.push(text);
+         }
+        //console.log(data[0])
+    
+    
+    
+var changebox=document.getElementById("changebox");
+changebox.style.display="block";
+var backbtn=document.createElement("button");
+changebox.appendChild(backbtn);
+backbtn.innerHTML="返回";
+backbtn.onclick=function(){
+  changebox.style.display="none";
+    window.location.reload();
+}
+var divpar=document.createElement("div");
+changebox.appendChild(divpar);
+for(var i=0,j=0;i<ths.length-2;i++){
+    divpar.innerHTML+=ths[i].innerText+":";
+var input=document.createElement("input");
+divpar.appendChild(input);
+input.defaultValue=data[i];
+var br=document.createElement("br");
+divpar.appendChild(br);
+}
+var time1=new Date();
+$("input")[6].defaultValue=time1.getFullYear()+'-'+time1.getMonth()+1+'-'+time1.getDate()+' '+time1.getHours()+':'+time1.getMinutes()+':'+time1.getSeconds();
+   
+var abandon=document.createElement("button");
+changebox.appendChild(abandon);
+abandon.style.cssText="margin-left:40%;"
+abandon.innerText="取消";
+var sure=document.createElement("button");
+changebox.appendChild(sure);
+sure.innerText="确定";
+abandon.onclick=function(){
+    changebox.style.display="none";
+    window.location.reload();
+}
+sure.onclick=function(){
+    var inputs=document.querySelectorAll("input");
+    axios.post('http://127.0.0.1:8000/changeorder',null,{
+        params:{
+            desknum:data[0],
+            username:data[1],
+            id:data[2],
+            name:data[3],
+            time:data[6],
+            changeid:inputs[2].value,
+            changename:inputs[3].value,
+            changeprice:inputs[4].value,
+            changeneedamount:inputs[5].value,
+            changetime:inputs[6].value,
+            changesuccess:inputs[7].value
+        }
+    }).then(show=>{
+        alert("修改完毕！")
+    })
+}
+     })
+ 
+        }).catch(error=>{
+            console.log(error);
+        })
+};
+$("#find").click(function(){
+    var findbox=document.getElementById("findbox");
+findbox.style.display="block";
+var backbtn1=document.createElement("button");
+findbox.appendChild(backbtn1);
+backbtn1.innerHTML="返回";
+backbtn1.onclick=function(){
+  findbox.style.display="none";
+    window.location.reload();
+}
+var divpar1=document.createElement("div");
+findbox.appendChild(divpar1);
+divpar1.innerHTML+="用餐桌号：";
+var inputfid=document.createElement("input");
+divpar1.appendChild(inputfid);
+var br1=document.createElement("br");
+divpar1.appendChild(br1);
+divpar1.innerHTML+="用餐人：";
+var inputfname=document.createElement("input");
+divpar1.appendChild(inputfname);
+var br2=document.createElement("br");
+divpar1.appendChild(br2);
+var beginfind=document.createElement("button");
+findbox.appendChild(beginfind);
+beginfind.style.cssText="margin-left:40%;margin-top:10px;"
+beginfind.innerHTML="开始查找";
+beginfind.onclick=function(){
+    var inputfidandname=document.querySelectorAll("input");
+    //console.log(inputfidandname[1].value)
+    if(inputfidandname[0].value==""||inputfidandname[1].value==""){
+        alert("桌号和用餐人数不能为空！》(**)《")
+    }else{
+    axios.get('http://127.0.0.1:8000/getorderbydeskandname?desknum='+inputfidandname[0].value+'&username='+inputfidandname[1].value).then(value=>{
+var findresult=document.getElementById("findresult");
+findresult.style.display="block";
+var result3=value.data;
+var backbtn1=document.createElement("button");
+findresult.appendChild(backbtn1);
+backbtn1.innerHTML="返回";
+var table1=document.createElement("table");
+findresult.appendChild(table1);
+table1.innerHTML="<tr><th>桌号</th><th>用餐人</th><th>餐号</th><th>菜名</th><th>单价</th><th>数量</th><th>时间</th><th>完成状况</th></tr>";
+backbtn1.onclick=function(){
+    findresult.innerHTML="";
+   findresult.style.display="none";
+}
+var style = document.createElement('style'); 
+ style.type = 'text/css'; 
+ style.innerHTML="table tr th,td{border:1px solid teal; }"; 
+ document.documentElement.appendChild(style);
+ for(var i=0;i<result3.length;i++){
+    
+                var row=document.createElement("tr");
+                table1.appendChild(row);
+                for(var j=0;j<8;j++){
+                    var col=document.createElement("td");
+                    row.appendChild(col);
+               switch(j){
+                   case 0:
+                       col.innerText=result3[i].desknum;
+                       break;
+
+                    case 1:
+                        col.innerText=result3[i].username;
+                        break;
+                    case 2:
+                        col.innerText=result3[i].id;
+                        break;
+                    case 3:
+                        col.innerText=result3[i].name;
+                        break;
+                    case 4:
+                        col.innerText=result3[i].price;
+                        break; 
+                    case 5:
+                        col.innerText=result3[i].needamount;
+                        break;
+                    case 6:
+                        col.innerText=result3[i].time;
+                        break;   
+                    case 7:
+                            col.innerText=result3[i].success;
+                            break;
+
+               }
+                
+                }
+            }
+    })
+    }
+}
+})
+ 
+setInterval(function(){
+    axios.get('http://127.0.0.1:8000/getorder').then(response=>{
+        var result3=response.data;
+        var trs=document.getElementsByClassName("row");
+        //console.log(trs.length)
+        if(trs.length!=result3.length){
+            var url=window.location.href;
+            window.location.href=url;//刷新页面
+
+        }
+    });
+
+   // window.location.reload();//刷新页面
+},1000)
+   
+</script>
+</html>

@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style type="text/css">
+        #content {
+            border: 2px solid #6a30b4;
+
+        }
+    </style>
+</head>
+
+<body>
+    <div id="all">
+        <div>
+            <h1 style="text-align: center;">自主点餐服务</h1>
+        </div>
+
+        <div id="desk" style="border: 1px dashed green;text-align: center;">请填写本人用餐桌号
+            <input type="text" id="desknum" v-model="desknum">
+            <h1 style="display: inline;">{{desknum}}</h1><br />
+            用餐人：<input type="text" id="username" v-model="username">
+            <h1 style="display: inline;">{{username}}</h1>
+
+        </div>
+        <div id="content"></div>
+        <div style="padding: 10px;"><input type="submit" id="submitbtn" value="選擇购买"
+                style="position:absolute;left: 40%;padding: 10px;" /> <input type="submit" id="submitbtn1" value="查找账单"
+                style="position:absolute;left: 60%;padding: 10px;" />
+        </div>
+
+    </div>
+</body>
+<script type="text/javascript" src="../js/vue.js"></script>
+<script type="text/javascript" src="../js/jquery-1.10.1.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/axios/0.11.0/axios.min.js"></script>
+<script> Vue.config.productionTip = false</script>
+<script type="text/javascript">
+    new Vue({
+        el: '#desk',
+        data: {
+            desknum: '',
+            username: ''
+        },
+        method: {
+
+        }
+
+    });
+    window.onload = function () {
+        //发送请求
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', 'http://172.20.10.7:8000/getall');
+        //发送
+        xhr.send();
+        //事件绑定
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status >= 200 && xhr.status < 300) {
+
+
+                    var result = JSON.parse(xhr.response);
+                    // document.getElementById("content").innerHTML = result[0].img;
+
+                    for (var i = 0; i < result.length; i++) {
+                        var row = document.createElement("div");
+
+                        document.getElementById("content").appendChild(row);
+
+                        row.style.cssText = "border:1px solid black";
+
+                        var fid = document.createElement("span");
+                        row.appendChild(fid);
+                        fid.setAttribute("class", "fid");
+                        fid.style.cssText = "border:1px dotted blue;background:linear-gradient(to right,red 10%,#2bb681 20%,green 40%,#b62b71,60%,yellow 80%,blue 100%);";
+                        fid.innerText = "第" + result[i].fid + "号菜品 \n";
+
+                        var fname = document.createElement("span");
+                        row.appendChild(fname);
+                        fname.setAttribute("class", "fname");
+                        fname.style.cssText = "border:1px dotted blue;color:red;";
+                        fname.innerText = result[i].fname;
+
+                        var fsold = document.createElement("span");
+                        row.appendChild(fsold);
+                        fsold.setAttribute("class", "fsold");
+                        fsold.style.cssText = "border:1px dotted blue;color:gold;";
+                        fsold.innerText = "已售出（份）:" + result[i].sold + "\n";
+
+                        var img = document.createElement("img");
+                        row.appendChild(img);
+                        img.src = result[i].img;
+
+
+                        img.style.cssText = "display:block;width:200px;height:150px;margin:0 auto;"
+
+
+                        var fprice = document.createElement("span");
+                        row.appendChild(fprice);
+                        fprice.setAttribute("class", "fprice");
+                        fprice.style.cssText = "position:absolute;left:50%;";
+                        fprice.innerText = "售价(￥):" + result[i].price;
+
+                        var remaincontent = document.createElement("span");
+                        row.appendChild(remaincontent);
+                        remaincontent.style.cssText = "float:right;";
+                        remaincontent.setAttribute("class", "remain");
+                        remaincontent.innerText = "今日剩余额量(份):" + result[i].remain;
+
+
+                        var remark = document.createElement("div");
+                        row.appendChild(remark);
+                        remark.style.cssText = "position:relative;border:1px dotted blue;overflow:hidden;width:150px;height:20px;";
+                        var remarkcontent = document.createElement("div");
+                        remark.appendChild(remarkcontent);
+                        remarkcontent.style.cssText = "position:absolute;left:0;top:0;"
+                        var remarkkid = document.createElement("span");
+                        remarkcontent.appendChild(remarkkid);
+                        remarkkid.style.cssText = "display:inline-block;white-space:nowrap;background:linear-gradient(to right,red 10%,#2bb681 20%,green 40%,#b62b71,60%,yellow 80%,blue 100%);-webkit-text-fill-color:transparent;-webkit-background-clip:text;";
+                        remarkkid.style.position = "absolute";
+                        remarkkid.setAttribute("class", "remark");
+                        remarkkid.innerText = result[i].remarks;
+                        //console.log(remarkkid.offsetWidth)
+
+                        var fneed = document.createElement("div");
+                        row.appendChild(fneed);
+                        fneed.style.cssText = "position:relative;height:40px;";
+                        var delicon = document.createElement("img");
+                        fneed.appendChild(delicon);
+                        delicon.setAttribute("class", "delicon");
+                        var needamount = document.createElement("span");
+                        fneed.appendChild(needamount);
+                        needamount.innerText = "0";
+                        needamount.setAttribute("class", "needamount");
+                        var addicon = document.createElement("img");
+                        fneed.appendChild(addicon);
+                        addicon.setAttribute("class", "addicon");
+                        // addicon.setAttribute("onclick","addamounts()");
+                        addicon.src = "../images/add.jpg";
+                        delicon.src = "../images/del.jpg";
+                        delicon.style.cssText = "display:inline-block;width:20px;height:20px;border-radius:50%;position:absolute;left:45%;padding:10px;";
+                        addicon.style.cssText = "display:inline-block;width:20px;height:20px;border-radius:50%;position:absolute;left:55%;padding:10px;";
+                        needamount.style.cssText = "position:absolute;left:50%;line-height:40px;";
+
+                    }
+
+                    var remarkall = document.getElementsByClassName("remark");
+
+                    function remarksloop() {
+                        for (var i = 0; i < remarkall.length; i++) {
+                            var objremarks = {
+                                x: remarkall[i].offsetLeft
+                            }
+
+
+                            objremarks.x -= 20;
+
+                            remarkall[i].style.left = objremarks.x + "px";
+
+                            // console.log(remarkall[i].offsetLeft);
+                            //remarksloop();
+
+                        }
+                        for (var i = 0; i < remarkall.length; i++) {
+
+                            if (Math.abs(remarkall[i].offsetLeft) > remarkall[i].offsetWidth) {
+                                remarkall[i].style.left = "0px";
+
+
+                            }
+                        }
+                    };
+                    setInterval(remarksloop, 1000);
+
+                    //  var needamounts=document.getElementsByClassName("needamount");
+                    //  var addicons=document.getElementsByClassName("addicon");
+                    // for(var j=0;j<addicons.length;j++){ 
+                    //     var val=0;
+                    //       addicons[j].onclick=function(){ 
+
+                    //               val++; 
+                    //                needamounts[j].innerHTML=val;
+                    //         }
+
+                    //               console.log(needamounts[0].textContent);
+
+                    //         }
+                    $(".addicon").click(function () {
+                        var n = $(this).prev().text();
+                        var num = parseInt(n) + 1;
+                        $(this).prev().text(num);
+                        console.log($(".needamount")[0].textContent);
+                    });
+                    $(".delicon").click(function () {
+                        var n = $(this).next().text();
+                        var num = parseInt(n) - 1;
+                        $(this).next().text(num);
+
+                    });
+
+
+                }//staus
+            }
+        }
+    }
+    var btn = document.getElementById("submitbtn");
+    btn.onclick = function () {
+        var fdesknum = document.getElementById("desknum");
+        var username = document.getElementById("username");
+        var fid = document.getElementsByClassName("fid");
+        var fname = document.getElementsByClassName("fname");
+        var fprice = document.getElementsByClassName("fprice");
+        var fremain = document.getElementsByClassName("remain");
+        var sold = document.getElementsByClassName("fsold");
+        var needamounts = document.getElementsByClassName("needamount");
+        var time = new Date();
+        var yearnow = time.getFullYear();
+        var monthnow = time.getMonth() + 1;
+        var datenow = time.getDate();
+        if (fdesknum.value == '' || username.value == '') {
+            alert("桌号和用餐人数不能为空！》(**)《")
+        }
+        else {
+
+            for (var i = 0; i < needamounts.length; i++) {
+
+                // console.log(objuploadparm)
+                if (parseInt(needamounts[i].textContent) > 0) {
+                    /// console.log(i)
+                    var fpricenum = fprice[i].textContent.split(":")[1];
+                    var objuploadparm = {
+                        desknum: fdesknum.value,
+                        username: username.value,
+                        id: fid[i].textContent,
+                        name: fname[i].textContent,
+                        price: fpricenum,
+                        needamount: needamounts[i].textContent,
+                        time: yearnow + '-' + monthnow + '-' + datenow + ' ' + time.getHours() + ':' + time.getMinutes() + ':' + time.getSeconds()
+                    };
+                    console.log(objuploadparm)
+                    const xhr1 = new XMLHttpRequest();
+                    xhr1.open('POST', 'http://172.20.10.7:8000/upload?desknum=' + objuploadparm.desknum + '&username=' + objuploadparm.username + '&id=' + objuploadparm.id + '&name=' + objuploadparm.name + '&price=' + objuploadparm.price + '&needamount=' + objuploadparm.needamount + '&time=' + objuploadparm.time);
+                    //发送
+
+                    var str = JSON.stringify(objuploadparm);
+                    console.log(str)
+                    //xhr1.setRequestHeader('dataType','json');
+                    //xhr1.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
+                    xhr1.send();
+
+                    xhr1.onreadystatechange = function () {
+                        if (xhr1.readyState === 4) {
+                            if (xhr1.status >= 200 && xhr1.status < 300) {
+                                for (var i = 0; i < needamounts.length; i++) {
+                                    if (parseInt(needamounts[i].textContent) > 0) {
+                                        var remaintext = fremain[i].textContent;
+                                       // console.log(remaintext)
+                                        var remainsplit = remaintext.split(":");
+                                        var remainnum = parseInt(remainsplit[1]) - parseInt(needamounts[i].innerText);
+                                        var soldtext = sold[i].textContent;
+                                        var soldsplit = soldtext.split(":");
+                                        var soldnum = parseInt(soldsplit[1]) + parseInt(needamounts[i].innerText);
+                                        fremain[i].innerText = "今日剩余额量(份):" + remainnum;
+                                        sold[i].innerText = "已售出(份):" + soldnum;
+                                        var fidnum = fid[i].textContent.slice(1, -4);
+                                        // console.log(sold[i].textContent)
+                                        axios.post('http://127.0.0.1:8000/updatedata', null, {//点餐完后更新上传已售出和剩余额量数据
+                                            params: {
+                                                remain: remainnum,
+                                                sold: soldnum,
+                                                fid: fidnum,
+                                                fname: fname[i].textContent
+                                            }
+                                        })
+
+                                        needamounts[i].innerText = "0"; //点餐完后选择归零
+
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+
+                }
+
+            }
+        }//else
+
+
+    }
+    //每隔1s刷新一次获取已售出和剩余额量数据
+    var remains = document.getElementsByClassName("remain");
+    var fsolds = document.getElementsByClassName("fsold");
+    setInterval(function () {
+        axios.get('http://127.0.0.1:8000/getall').then(response => {
+            var result = response.data;
+            for (var i = 0; i < remains.length; i++) {
+                if (result[i].remain == 0) {//如果餐没有了则不能点
+                    $(".addicon")[i].style.cssText = "visibility:hidden;";
+                    $(".delicon")[i].style.cssText = "visibility:hidden;";
+                    $(".needamount")[i].innerText = "0";
+                    //console.log($(".addicon").length)
+                }
+                remains[i].innerText = "今日剩余额量（份）:" + result[i].remain;
+                fsolds[i].innerText = "已售出（份）:" + result[i].sold;
+            }
+            // console.log(response.data[0].remain)
+        }).catch(error => {
+            console.log(error)
+        })
+    }, 1000)
+
+    var btn1 = document.getElementById("submitbtn1");
+    btn1.onclick = function () {
+        var desknum = document.getElementById("desknum");
+        var username = document.getElementById("username");
+        if (desknum.value == "" || username.value == "") {
+            alert("桌号和用餐人数不能为空！》(**)《")
+        }
+        else {
+            axios.get('http://127.0.0.1:8000/getorderbydeskandname?desknum=' + desknum.value + '&username=' + username.value).then(value => {
+                var body = document.body;
+                body.style.display = "none";
+                var result3 = value.data;
+                var body1 = document.createElement("body");
+                document.documentElement.appendChild(body1);
+                var backbtn = document.createElement("button");
+                body1.appendChild(backbtn);
+                backbtn.innerHTML = "返回";
+                var table1 = document.createElement("table");
+                body1.appendChild(table1);
+                table1.innerHTML = "<tr><th>桌号</th><th>用餐人</th><th>餐号</th><th>菜名</th><th>单价</th><th>数量</th><th>时间</th><th>完成状况</th></tr>";
+                backbtn.onclick = function () {
+                    body1.innerHTML = "";
+                    body1.style.display = "none";
+                    body.style.display = "block";
+                }
+                var style = document.createElement('style');
+                style.type = 'text/css';
+                style.innerHTML = "table tr th,td{border:1px solid teal; }";
+                document.documentElement.appendChild(style);
+                for (var i = 0; i < result3.length; i++) {
+                    var ths = document.getElementsByTagName("th");
+                    var row = document.createElement("tr");
+                    table1.appendChild(row);
+                    for (var j = 0; j < ths.length; j++) {
+                        var col = document.createElement("td");
+                        row.appendChild(col);
+                        switch (j) {
+                            case 0:
+                                col.innerText = result3[i].desknum;
+                                break;
+
+                            case 1:
+                                col.innerText = result3[i].username;
+                                break;
+                            case 2:
+                                col.innerText = result3[i].id;
+                                break;
+                            case 3:
+                                col.innerText = result3[i].name;
+                                break;
+                            case 4:
+                                col.innerText = result3[i].price;
+                                break;
+                            case 5:
+                                col.innerText = result3[i].needamount;
+                                break;
+                            case 6:
+                                col.innerText = result3[i].time;
+                                break;
+                            case 7:
+                                col.innerText = result3[i].success;
+                                break;
+
+                        }
+
+                    }
+                }
+            })
+        }
+    }
+
+// setInterval(function(){
+//     var time=new Date();
+//     if(time.getHours()==0){
+//         axios.post('http://127.0.0.1:8000/updatedayfremain')
+//     }
+// },1000)
+</script>
+
+</html>
